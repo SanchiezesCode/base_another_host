@@ -1,0 +1,29 @@
+services:
+  promtail:
+    image: grafana/promtail:3.0.0
+    container_name: promtail
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+    restart: unless-stopped
+    volumes:
+      - ./config/promtail/promtail.yaml:/etc/promtail/docker-config.yaml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/docker-config.yaml
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    labels:
+      logging: "promtail"
+      logging_jobname: "containerlogs"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
